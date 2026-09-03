@@ -1,0 +1,16 @@
+/*
+
+---
+---
+
+
+@use 'main
+{%- if jekyll.environment == 'production' -%}
+  .bundle
+{%- endif -%}
+';
+
+:root[data-bs-theme="dark"] {
+  --main-bg: #280808;
+}
+*/
