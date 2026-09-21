@@ -8,7 +8,7 @@ media_subpath: /assets/img/posts/trick/
 ---
 
 
-## Disclaimer: Not a traditional writeup, but a deep dive into LFI
+## Disclaimer: Not a traditional writeup; A deep dive into LFI
 **If you are looking for a traditional writeup of the box HTB Trick, maybe cause you are stuck somewhere and need a nudge, then my blog post is not helpful to you.**
 I won't cover this box fully. I will only show the shortest path to get to the LFI part, and I will completely omit the privilege escalation part of this box.
 
@@ -186,7 +186,7 @@ Pay attention to the "`Indicators of`" type callouts, those are important ones.
 
 ### Investigating the "preprod-marketing.trick.htb" vhost
 Upon discovering and visiting the marketing vhost, you are met with this landing page:
-![](1.png)
+![](htb/trick/trick_deepdive_screenshots/1.png)
 
 Clicking on "services" – or any of the 4 links for that matter – you can notice that the URL scheme changes to `http://preprod-marketing.trick.htb/index.php?page=services.html`.
 Suddenly we see `index.php` in the URL, which we previously didn't.
