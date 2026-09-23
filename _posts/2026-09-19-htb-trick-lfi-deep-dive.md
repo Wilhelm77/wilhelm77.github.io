@@ -186,7 +186,7 @@ Pay attention to the "`Indicators of`" type callouts, those are important ones.
 
 ### Investigating the "preprod-marketing.trick.htb" vhost
 Upon discovering and visiting the marketing vhost, you are met with this landing page:
-![](htb/trick/trick_deepdive_screenshots/1.png)
+![](1.png)
 
 Clicking on "services" – or any of the 4 links for that matter – you can notice that the URL scheme changes to `http://preprod-marketing.trick.htb/index.php?page=services.html`.
 Suddenly we see `index.php` in the URL, which we previously didn't.

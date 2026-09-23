@@ -830,6 +830,6 @@ SMB         10.129.72.143   445    DC               d1d9dd4d<REDACTED>
 This concludes my writeup for the box `Administrator`. I hope this read was worth your time.
 While this box could be rated easy instead of medium, I found it nonetheless very beneficial for drilling ad basics and getting comfortable with ad related tools like `bloodyAD`.
 
-I do recommend testing with 2 different tools for the same job, like in the [DCsync section](#DCsync-attack), where we used `netexec` and `impacket-secretsdump` to dump the domain hashes, as you never know if a tool might fail you in an exam or a real engagement.
+I do recommend testing with 2 different tools for the same job, like in the [DCsync section](#dcsync-attack), where we used `netexec` and `impacket-secretsdump` to dump the domain hashes, as you never know if a tool might fail you in an exam or a real engagement.
 
 
