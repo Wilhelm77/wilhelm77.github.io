@@ -12,8 +12,8 @@ media_subpath: /assets/img/posts/administrator/
 
 Welcome to my writeup on the box Administrator. By the end of this post, you will have a better understanding of AD attacks, a [cheat sheet](#cheat-sheet-of-commands-used-in-this-writeup) of all commands used in this writeup and a small collection of basic level methodology steps – relevant to this writeup.
 #### Who this writeup is for and your assumed knowledge
-The post is written for someone, who is learned the fundamentals of pentesting – like someone working on the CPTS path – going through concepts like initial enumeration of exposed services / ports.
-You should posses a basic understanding of Active Directory, as well as basic ad enumeration and attack methods. Otherwise this post will likely be more confusing than helpful to you. If you feel like – while reading – that most of what you are reading is completely foreign to you, it might be worth exploring the fundamentals of each topic first, so you gain more out of this writeup.
+The post is written for someone, who has learned, or is still learning the fundamentals of pentesting – like someone working on the CPTS path – going through concepts like initial enumeration of exposed services / ports.
+You should possess a basic understanding of Active Directory, as well as basic ad enumeration and attack methods. Otherwise this post will likely be more confusing than helpful to you. If you feel like – while reading – that most of what you are reading is completely foreign to you, it might be worth exploring the fundamentals of each topic first, so you gain more out of this writeup.
 
 #### What to expect and find in this writeup
 Besides the main part of the writeup, I've tried to include steps that emphasize essential enumeration methodology steps, like re-enumerating services with newly gained users, so you hopefully get a better feel for how thorough enumeration works.
@@ -23,7 +23,7 @@ I also included a [cheat sheet of all commands](#cheat-sheet-of-commands-used-in
 ### cheat sheet of commands used in this writeup
 ```console
 # default nmap scan
-sudo nmap -sCV 10.129.72.5 -oN nmap/defaul_nmap.out
+sudo nmap -sCV 10.129.72.5 -oN nmap/default_nmap.out
 
 # run rusthound-ce for data collection
 (-d $domain = must be IP of target in /etc/hosts)
@@ -79,7 +79,7 @@ nxc ftp $host -u $user -p $pass --get file.txt
 
 
 ### simple methodology steps used
-While very surface level, I still belief keeping it simple here is most beneficial for a writeup since this is not a methodology deep dive.
+While very surface level, I still think keeping it simple here is most beneficial for a writeup since this is not a methodology deep dive.
 I only included the methodology steps taken from the writeup, not from general concepts.
 
 #### Checks to do for each compromised user
@@ -97,8 +97,8 @@ I only included the methodology steps taken from the writeup, not from general c
 - Check `group membership` of compromised user.
 
 ### Administrator short summary
-Administrator is an great box to practice your bloodhound and bloodyAD skills.
-You will attack a Domain controller with a set of credentials to start of. By collecting and investigating `bloodhound` data, you discover that your starting user is able to modify the password of a user, which in turn can modify another user's password. That user has privileges to access the `FTP` service, where you will find a `passwordsafe v3` file. Initial access is denied, due to a password requirement. You crack the master password via `hashcat`, access the `passwordsafe` file, and discover credentials for the next user. That user has `GenericWrite` over the final user, which you gain access to by performing a `targeted Kerberoast` attack. With the final user under control, you perform a `DCSync` attack, which grants you the hashes of all user's in the domain, including the domain admin and thus full domain compromise.
+Administrator is a great box to practice your bloodhound and bloodyAD skills.
+You will attack a Domain controller with a set of credentials to start off. By collecting and investigating `bloodhound` data, you discover that your starting user is able to modify the password of a user, which in turn can modify another user's password. That user has privileges to access the `FTP` service, where you will find a `passwordsafe v3` file. Initial access is denied, due to a password requirement. You crack the master password via `hashcat`, access the `passwordsafe` file, and discover credentials for the next user. That user has `GenericWrite` over the final user, which you gain access to by performing a `targeted Kerberoast` attack. With the final user under control, you perform a `DCSync` attack, which grants you the hashes of all user's in the domain, including the domain admin and thus full domain compromise.
 
 ---
 
@@ -108,7 +108,7 @@ Since this is an assumed breach scenario – as is common in real pentests – w
 olivia:ichliebedich
 ```
 
-To keep track of your compromised accounts, it's good hygiene to maintain a sort of `creds.txt` file which you update with newly gain credentials, upon compromise.
+To keep track of your compromised accounts, it's good hygiene to maintain a sort of `creds.txt` file which you update with newly gained credentials, upon compromise.
 ```console
 ┌──(kali㉿kali)-[~/obsidian_vault/htb/administrator]
 └─$ cat creds.txt
@@ -208,7 +208,7 @@ Negative on both.
 ## Bloodhound enumeration 
 ### initial enumeration via Olivia
 When having access to an Active Directory user, bloodhound is an invaluable tool, to kick off your initial enumeration.
-First, we need to collect data for bloodhound to analyze, which can later analyze in the web GUI.
+First, we need to collect data for bloodhound to analyze, which we can later analyze in the web GUI.
 My choice here is [rusthound-ce](https://github.com/g0h4n/RustHound-CE) but you can also use the well known [bloodhound-python-ce](https://github.com/dirkjanm/BloodHound.py/tree/bloodhound-ce).
 I run the following command, using the creds for `olivia`:
 ```console
@@ -260,18 +260,18 @@ I search for our initial user `olivia` and mark this account as owned:
 ![](administrator-2.png)
 ![](administrator-3.png)
 ### bloodhound – ACE investigation
-The whole chain starts here: look for `Outbound Object Control` entries for your compromised and see what capabilities the user possesses. 
+The whole chain starts here: look for `Outbound Object Control` entries for your compromised user and see what capabilities the user possesses. 
 
 Checking `Outbound Object Control` of olivia reveals ACE on michael.
 ![](administrator-4.png)
 
-Olivia has `GenericAll` over Michael. Clicking on `GenericALl` reveals more information provided by bloodhound:
+Olivia has `GenericAll` over Michael. Clicking on `GenericAll` reveals more information provided by bloodhound:
 ![](administrator-5.png)
 ![](administrator-6.png)
 
 In short, `GenericAll` grants us full control over the user.
 
-The `Linux abuse` section shows a some recommendations on how to utilize those access rights:
+The `Linux abuse` section shows some recommendations on how to utilize those access rights:
 ![](administrator-7.png)
 
 I will decide to change the password of `michael`.
@@ -303,7 +303,7 @@ What we are looking at, is the SID: ``S-1-5-21-1088858960-373806567-254189436-11
 The SID consists of two major parts:
 - domain identifier: `S-1-5-21-1088858960-373806567-254189436`
 - RID: `1111` 
-For us, the RID is relevant. In active directory environments, RID below 1000 are reserved for built in active directory groups. the `Share Moderators` has the RID of 1111 – non default group.
+For us, the RID is relevant. In active directory environments, RIDs below 1000 are reserved for built in active directory groups. the `Share Moderators` has the RID of 1111 – non default group.
 
 Chances are, that members of this group will have access to either special SMB shares, *or perhaps the FTP service*, that we were unable to access so far.
 
@@ -311,13 +311,13 @@ For now, it seems like `benjamin` is our most valuable target.
 
 >**but don't neglect enumerating the other users.**
 >While `benjamin` is the main target we should do our due diligence and still perform basic enumeration steps with each user we compromise, as we never know if and where decisive information may be hidden. A quick check on SMB shares and FTP won't take much time.
-{: .prompt-warning}.
+{: .prompt-warning}
 
 
 
 To better visualize attack paths, we can use the `PATHFINDING` functionality inside bloodhound, set our starting and target user – olivia and benjamin respectively:
 
-![](administrator-13.png]
+![](administrator-13.png)
 
 This presents us with the full path we need to chase down:
 ![](administrator-14.png)
@@ -332,7 +332,7 @@ I will go the password change route, using [bloodyAD](https://github.com/Cravate
 ![](administrator-5.png)
 
 ### Changing password of michael
-`BloodyAD` can be trick in the beginning, especially if you are still learning Active Directory in general. I certainly did struggle with it.
+`BloodyAD` can be tricky in the beginning, especially if you are still learning Active Directory in general. I certainly did struggle with it.
 A helpful way to figure out the syntax, is to utilize `--help` after each step of the syntax – here is what I mean:
 
 ```console
@@ -403,7 +403,7 @@ I change `michael`'s password to something more or less secure:
 ┌──(kali㉿kali)-[~/obsidian_vault/htb/administrator]
 └─$ nxc smb administrator.htb -u michael -p 'gig4-p4ssGG'
 SMB         10.129.72.5     445    DC               [*] Windows Server 2022 Build 20348 x64 (name:DC) (domain:administrator.htb) (signing:True) (SMBv1:False) (Null Auth:True) (DC:True)
-SMB         10.129.72.5     445    DC               [+] administrator.htb\michael:cr4zyP@ss77-- 
+SMB         10.129.72.5     445    DC               [+] administrator.htb\michael:gig4-p4ssGG
 ```
 Verifying the credentials with `netexec` shows that our change was successful.
 
@@ -499,7 +499,7 @@ FTP         10.129.72.143   21     administrator    [+] benjamin:om3g4-p4ssGG
 ```
 
 So let's investigate the FTP server.
-A few things you should always check once you find FTP server:
+A few things you should always check once you find an FTP server:
 - check if you can upload.
 - see what files you have access to.
 
@@ -570,7 +570,7 @@ A quick search reveals the right github repo.
 ![](administrator-16.png)
 ![](administrator-17.png)
 
-I had to search for "non-windows" as the standard downloads were not for linux:
+I had to search for "non-windows" as the standard downloads were not for Linux:
 ![](administrator-18.png)
 
 ![](administrator-19.png)
@@ -594,7 +594,7 @@ Let's start the tool to see if we can access the password safe file.
 ![](administrator-22.png)
 
 It looks like it wants a password to access – I mean obviously, but you never know..
-Let's try cracking the password to access it's content.
+Let's try cracking the password to access its content.
 #### cracking the pwsafe master password
 It seems like hashcat supports cracking pwsafe files:
 ![](administrator-23.png)
@@ -612,7 +612,7 @@ Backup.psafe3:tekieromucho
 
 ![](administrator-24.png)
 
-Three users. I'll verify each of the credential pairs via netexec, to see which are vaild.
+Three users. I'll verify each of the credential pairs via netexec, to see which are valid.
 ![](administrator-25.png)
 
 ```
@@ -656,7 +656,7 @@ Adding emily to `owned` in bloodhound:
 
 
 
-Checking Emily's group memberships reveals, that his account is member of `Remote Management Users`, so getting a shell via `evil-winrm` should likely work:
+Checking Emily's group memberships reveals, that this account is a member of `Remote Management Users`, so getting a shell via `evil-winrm` should likely work:
 ![](administrator-27.png)
 
 
@@ -676,7 +676,7 @@ c7b528d<REDACTED>
 
 ---
 ## Getting access to ethan
-Investigating the `outbound object control` entries Emily reveals `GenericWrite` over Ethan.
+Investigating the `outbound object control` entries of Emily reveals `GenericWrite` over Ethan.
 ![](administrator-28.png)
 
 Ethan in turn can perform a `DCSync` attack, aka dump hashes of all domain users – including the domain admin. This is our target.
@@ -710,7 +710,7 @@ Let's perform a targeted kerberoast attack against `ethan`.
 ```
 
 ah.. classic, the *clock skew error*.
-Kerberos is very sensitive to time synchronization between the client and the server. As seeing the clock skew error means that our time is  off by more than 5 minutes from the Domain controller.
+Kerberos is very sensitive to time synchronization between the client and the server. As seeing the clock skew error means that our time is off by more than 5 minutes from the Domain controller.
 
 We have to sync our time with that of the domain controller:
 ```console
