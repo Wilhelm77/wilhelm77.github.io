@@ -201,6 +201,7 @@ Negative on both.
 
 
 >**enumeration methodology change on assumed breach**
+>
 >When having an assumed breach scenario, I keep the unauthenticated enumeration steps for when I am stuck, so no anon or guest account enumeration for now.
 {: .prompt-info }
 
@@ -310,6 +311,7 @@ Chances are, that members of this group will have access to either special SMB s
 For now, it seems like `benjamin` is our most valuable target.
 
 >**but don't neglect enumerating the other users.**
+>
 >While `benjamin` is the main target we should do our due diligence and still perform basic enumeration steps with each user we compromise, as we never know if and where decisive information may be hidden. A quick check on SMB shares and FTP won't take much time.
 {: .prompt-warning}
 
@@ -739,6 +741,7 @@ We get a crackable hash for ethan.
 I'll add the hash to a file, and crack with hashcat:
 
 >**Prevent copy paste errors:**
+>
 >start copying from the very beginning of the hash: `$krb5tgs$23$*ethan$ADMINISTRATOR.HTB`)
 {: .prompt-warning}
 
