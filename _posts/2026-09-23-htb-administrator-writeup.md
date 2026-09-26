@@ -1,5 +1,5 @@
 ---
-title: "HTB Administrator – Pure AD attack chains."
+title: "HTB Administrator – Pure AD attack chains"
 date: 2026-09-23 16:00:00 +0200
 categories: [writeups]
 tags: [cpts-prep, AD, bloodhound, bloodyad, kerberoasting, hashcat]
